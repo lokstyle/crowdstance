@@ -82,6 +82,7 @@ Open http://localhost:8000 in your browser.
 
 ## Project Structure
 
+```
 crowdstance/
 ├── api.py                 # FastAPI backend, endpoints, caching, rate limiting
 ├── reddit_fetcher.py      # Reddit public JSON API fetcher
@@ -94,6 +95,7 @@ crowdstance/
 ├── .env.example           # API key template
 ├── requirements.txt       # Python dependencies
 └── README.md
+```
 
 ---
 
