@@ -1,4 +1,5 @@
 CrowdStance — Future Plans
+
 Short Term
 
 Fine-tune stance detection model on Reddit-specific data to improve accuracy on sarcastic and context-dependent comments
