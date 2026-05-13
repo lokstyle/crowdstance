@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdStance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root[data-theme="light"] {
+            --bg: #f5f4f0;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --bg-subtle: #eeece8;
+            --border: #e0ddd8;
+            --border-focus: #1a1a1a;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b6860;
+            --text-muted: #9a9890;
+            --accent: #1a1a1a;
+            --accent-hover: #333;
+            --btn-text: #ffffff;
+            --tag-bg: #eeece8;
+            --tag-text: #6b6860;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.10);
+            --for-tag: #dcfce7; --for-text: #15803d; --for-border: #22c55e;
+            --against-tag: #fee2e2; --against-text: #dc2626; --against-border: #ef4444;
+            --nuanced-tag: #dbeafe; --nuanced-text: #2563eb; --nuanced-border: #3b82f6;
+            --bar-bg: #eeece8;
+            --highlight-bg: #fef9c3;
+            --highlight-text: #854d0e;
+        }
+        :root[data-theme="dark"] {
+            --bg: #0d0d0d;
+            --bg-card: #161616;
+            --bg-input: #1a1a1a;
+            --bg-subtle: #1f1f1f;
+            --border: #2a2a2a;
+            --border-focus: #ffffff;
+            --text-primary: #f0ede8;
+            --text-secondary: #8a8880;
+            --text-muted: #5a5858;
+            --accent: #f0ede8;
+            --accent-hover: #ffffff;
+            --btn-text: #0d0d0d;
+            --tag-bg: #2a2a2a;
+            --tag-text: #8a8880;
+            --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.4);
+            --for-tag: #14532d; --for-text: #4ade80; --for-border: #22c55e;
+            --against-tag: #450a0a; --against-text: #f87171; --against-border: #ef4444;
+            --nuanced-tag: #1e3a8a; --nuanced-text: #60a5fa; --nuanced-border: #3b82f6;
+            --bar-bg: #2a2a2a;
+            --highlight-bg: #422006;
+            --highlight-text: #fbbf24;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+
+        header { display: flex; align-items: center; justify-content: space-between; padding: 18px 40px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; transition: background 0.3s, border-color 0.3s; }
+        .logo { display: flex; align-items: baseline; gap: 10px; }
+        .logo h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+        .logo-sub { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .theme-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 6px 14px; border-radius: 20px; background: var(--bg-subtle); border: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); font-family: 'Sora', sans-serif; transition: all 0.2s; }
+        .theme-toggle:hover { border-color: var(--border-focus); color: var(--text-primary); }
+        .tabs { display: flex; gap: 4px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 10px; padding: 4px; }
+        .tab { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--text-secondary); font-family: 'Sora', sans-serif; transition: all 0.2s; }
+        .tab.active { background: var(--bg-card); color: var(--text-primary); box-shadow: var(--shadow); }
+
+        main { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .hero { text-align: center; margin-bottom: 36px; }
+        .hero h2 { font-size: 36px; font-weight: 700; letter-spacing: -1.5px; line-height: 1.15; margin-bottom: 10px; }
+        .hero h2 em { font-style: normal; color: var(--text-secondary); }
+        .hero p { font-size: 15px; color: var(--text-secondary); }
+        .examples { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+        .example-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-card); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.18s; font-family: 'Sora', sans-serif; }
+        .example-chip:hover { border-color: var(--border-focus); color: var(--text-primary); transform: translateY(-1px); }
+
+        .history-section { margin-bottom: 24px; }
+        .history-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+        .history-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+        .history-chip { padding: 5px 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-card); font-size: 12px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+        .history-chip:hover { border-color: var(--border-focus); color: var(--text-primary); }
+
+        .search-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 32px; }
+        .input-wrap { position: relative; margin-bottom: 14px; }
+        .input-wrap input { width: 100%; background: var(--bg-input); border: 1.5px solid var(--border); border-radius: 10px; padding: 13px 18px; font-size: 15px; font-family: 'Sora', sans-serif; color: var(--text-primary); outline: none; transition: border-color 0.2s; }
+        .input-wrap input:focus { border-color: var(--border-focus); }
+        .input-wrap input::placeholder { color: var(--text-muted); }
+        .compare-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .compare-inputs input { width: 100%; background: var(--bg-input); border: 1.5px solid var(--border); border-radius: 10px; padding: 13px 18px; font-size: 14px; font-family: 'Sora', sans-serif; color: var(--text-primary); outline: none; transition: border-color 0.2s; }
+        .compare-inputs input:focus { border-color: var(--border-focus); }
+        .compare-inputs input::placeholder { color: var(--text-muted); }
+
+        .platform-row { display: flex; gap: 8px; margin-bottom: 14px; }
+        .platform-btn { flex: 1; padding: 9px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 13px; font-family: 'Sora', sans-serif; font-weight: 500; transition: all 0.18s; }
+        .platform-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+        .platform-btn.active { border-color: var(--accent); color: var(--accent); background: var(--bg-subtle); font-weight: 600; }
+
+        .advanced-toggle { font-size: 13px; color: var(--text-muted); cursor: pointer; margin-bottom: 14px; display: inline-flex; align-items: center; gap: 6px; user-select: none; }
+        .advanced-toggle:hover { color: var(--text-secondary); }
+        .advanced-panel { display: none; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; gap: 12px; flex-direction: column; }
+        .advanced-panel.open { display: flex; }
+        .adv-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .adv-label { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); min-width: 100px; }
+        .adv-input { background: var(--bg-input); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: 'Sora', sans-serif; color: var(--text-primary); outline: none; transition: border-color 0.2s; flex: 1; }
+        .adv-input:focus { border-color: var(--border-focus); }
+        .limit-options { display: flex; gap: 6px; }
+        .limit-btn { padding: 6px 14px; border-radius: 6px; border: 1.5px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 13px; font-family: 'Sora', sans-serif; transition: all 0.15s; }
+        .limit-btn.active { border-color: var(--accent); color: var(--accent); background: var(--bg-card); }
+        .time-options { display: flex; gap: 6px; flex-wrap: wrap; }
+        .time-btn { padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 12px; font-family: 'Sora', sans-serif; transition: all 0.15s; }
+        .time-btn.active { border-color: var(--accent); color: var(--accent); background: var(--bg-card); }
+
+        .analyze-btn { width: 100%; padding: 13px; background: var(--accent); color: var(--btn-text); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: 'Sora', sans-serif; cursor: pointer; transition: all 0.2s; }
+        .analyze-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+        .analyze-btn:active { transform: translateY(0); }
+        .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .intel-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 24px; box-shadow: var(--shadow); display: none; }
+        .intel-panel.visible { display: block; }
+        .intel-title { font-size: 13px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .intel-title span { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-weight: 400; }
+        .intel-aspects { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+        .aspect-chip { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--bg-subtle); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.18s; font-family: 'Sora', sans-serif; }
+        .aspect-chip:hover { border-color: var(--border-focus); color: var(--text-primary); }
+        .aspect-chip.selected { border-color: var(--accent); color: var(--accent); background: var(--bg-card); font-weight: 600; }
+        .intel-actions { display: flex; gap: 8px; }
+        .intel-proceed { padding: 9px 20px; background: var(--accent); color: var(--btn-text); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Sora', sans-serif; cursor: pointer; transition: all 0.2s; }
+        .intel-proceed:hover { background: var(--accent-hover); }
+        .intel-skip { padding: 9px 16px; background: transparent; color: var(--text-muted); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'Sora', sans-serif; cursor: pointer; transition: all 0.2s; }
+        .intel-skip:hover { color: var(--text-secondary); border-color: var(--text-secondary); }
+
+        .loading { display: none; text-align: center; padding: 48px 0; }
+        .loading.visible { display: block; }
+        .dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 16px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); animation: pulse 1.2s ease-in-out infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse { 0%,80%,100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1.2); opacity: 1; } }
+        .loading p { font-size: 13px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+
+        .cached-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; margin-left: 8px; }
+
+        .results { display: none; }
+        .results.visible { display: block; }
+
+        .filter-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-label { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+        .filter-btn { padding: 5px 12px; border-radius: 6px; border: 1.5px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 12px; font-family: 'Sora', sans-serif; transition: all 0.15s; }
+        .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--bg-subtle); font-weight: 600; }
+        .sort-select { margin-left: auto; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; font-family: 'Sora', sans-serif; color: var(--text-secondary); outline: none; cursor: pointer; }
+
+        .summary-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; margin-bottom: 16px; box-shadow: var(--shadow); }
+        .summary-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 8px; }
+        .summary-title { font-size: 15px; font-weight: 600; }
+        .summary-meta { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .stance-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--bar-bg); margin-bottom: 10px; }
+        .bar-seg { transition: flex 0.8s cubic-bezier(0.4,0,0.2,1); }
+        .bar-for { background: #22c55e; } .bar-against { background: #ef4444; } .bar-nuanced { background: #3b82f6; }
+        .stance-labels { display: flex; gap: 20px; font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .lbl-for { color: #22c55e; } .lbl-against { color: #ef4444; } .lbl-nuanced { color: #3b82f6; }
+
+        .divergence-row { display: flex; gap: 16px; align-items: flex-start; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+        .div-block { flex: 1; min-width: 140px; }
+        .div-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+        .div-score { font-size: 32px; font-weight: 700; letter-spacing: -1.5px; margin-bottom: 4px; }
+        .platform-pills { display: flex; gap: 8px; flex-wrap: wrap; flex: 2; }
+        .platform-pill { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); flex: 1; min-width: 150px; }
+        .platform-pill strong { color: var(--text-primary); display: block; margin-bottom: 4px; font-size: 13px; }
+        .pill-stats { display: flex; gap: 8px; }
+        .pill-for { color: #22c55e; } .pill-against { color: #ef4444; } .pill-nuanced { color: #3b82f6; }
+
+        .divergence-explanation { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+        .divergence-explanation strong { color: var(--text-primary); font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
+
+        .subreddit-breakdown { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+        .sub-breakdown-title { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+        .sub-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .sub-name { font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); min-width: 140px; font-size: 12px; }
+        .sub-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--bar-bg); overflow: hidden; display: flex; }
+        .sub-count { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; min-width: 30px; text-align: right; }
+
+        .insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+        .insight-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: var(--shadow); }
+        .ic-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .stance-tag { font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 5px; }
+        .tag-for { background: var(--for-tag); color: var(--for-text); }
+        .tag-against { background: var(--against-tag); color: var(--against-text); }
+        .tag-nuanced { background: var(--nuanced-tag); color: var(--nuanced-text); }
+        .ic-count { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .ic-summary { font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+        .ic-empty { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+        .conf-dist-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+        .conf-dist-title { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        .conf-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--bar-bg); margin-bottom: 8px; }
+        .conf-seg { transition: flex 0.6s ease; }
+        .conf-high { background: #22c55e; }
+        .conf-med { background: #f59e0b; }
+        .conf-low { background: #94a3b8; }
+        .conf-labels { display: flex; gap: 16px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+        .conf-high-lbl { color: #22c55e; }
+        .conf-med-lbl { color: #f59e0b; }
+        .conf-low-lbl { color: #94a3b8; }
+        .conf-note { font-size: 12px; color: var(--text-muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+        .keywords-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+        .keywords-title { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+        .keywords-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+        .keyword-chip { padding: 5px 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg-subtle); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: 'Sora', sans-serif; }
+        .keyword-chip:hover { border-color: var(--border-focus); color: var(--text-primary); transform: translateY(-1px); }
+
+        .minority-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+        .minority-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .minority-note { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+        .minority-comment { background: var(--bg-subtle); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+
+        .stance-group { margin-bottom: 24px; animation: fadeUp 0.4s ease forwards; opacity: 0; }
+        @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+        .stance-group:nth-child(1) { animation-delay: 0.05s; }
+        .stance-group:nth-child(2) { animation-delay: 0.15s; }
+        .stance-group:nth-child(3) { animation-delay: 0.25s; }
+        .group-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .group-count { font-size: 13px; color: var(--text-muted); }
+
+        .comment-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 8px; transition: box-shadow 0.2s; position: relative; }
+        .comment-card:hover { box-shadow: var(--shadow); }
+        .comment-card.for { border-left: 3px solid var(--for-border); }
+        .comment-card.against { border-left: 3px solid var(--against-border); }
+        .comment-card.nuanced { border-left: 3px solid var(--nuanced-border); }
+        .comment-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+        .source-badge { font-size: 11px; font-family: 'JetBrains Mono', monospace; padding: 2px 7px; border-radius: 4px; background: var(--tag-bg); color: var(--tag-text); }
+        .sub-badge { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+        .score-badge { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+        .conf-badge { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+        .comment-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+        .view-link { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); text-decoration: none; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border); transition: all 0.15s; }
+        .view-link:hover { color: var(--text-primary); border-color: var(--text-primary); }
+        .comment-text { font-size: 14px; line-height: 1.65; color: var(--text-secondary); cursor: pointer; }
+        .comment-text.collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .expand-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; cursor: pointer; }
+        .reason-text { font-size: 12px; color: var(--text-muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-style: italic; display: none; }
+        .comment-card:hover .reason-text { display: block; }
+
+        .highlight { background: var(--highlight-bg); color: var(--highlight-text); border-radius: 3px; padding: 0 2px; font-weight: 500; }
+        .error-card { background: var(--against-tag); border: 1px solid var(--against-border); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; color: var(--against-text); font-size: 14px; }
+
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .compare-col-title { font-size: 13px; font-weight: 600; font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; padding: 8px 12px; background: var(--bg-subtle); border-radius: 8px; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <h1>CrowdStance</h1>
+        <span class="logo-sub">opinion retrieval</span>
+    </div>
+    <div class="header-right">
+        <div class="tabs" id="modeTabs">
+            <button class="tab active" data-mode="single">Single Topic</button>
+            <button class="tab" data-mode="compare">Compare</button>
+        </div>
+        <button class="theme-toggle" id="themeToggle">☀️ Light</button>
+    </div>
+</header>
+
+<main>
+    <div class="hero">
+        <h2>What does the internet <em>actually</em> think?</h2>
+        <p>Structured opinion retrieval across Reddit & Hacker News</p>
+        <div class="examples">
+            <span class="example-chip" data-topic="remote work">remote work</span>
+            <span class="example-chip" data-topic="electric vehicles">electric vehicles</span>
+            <span class="example-chip" data-topic="AI regulation">AI regulation</span>
+            <span class="example-chip" data-topic="universal basic income">universal basic income</span>
+            <span class="example-chip" data-topic="crypto">crypto</span>
+        </div>
+    </div>
+
+    <div class="history-section" id="historySection" style="display:none">
+        <div class="history-label">Recent searches</div>
+        <div class="history-chips" id="historyChips"></div>
+    </div>
+
+    <div class="search-card">
+        <div id="singleMode">
+            <div class="input-wrap">
+                <input type="text" id="queryInput" placeholder="Enter a topic or question (e.g. why do people hate Tesla service?)">
+            </div>
+        </div>
+        <div id="compareMode" style="display:none">
+            <div class="compare-inputs">
+                <input type="text" id="queryA" placeholder="Topic A">
+                <input type="text" id="queryB" placeholder="Topic B">
+            </div>
+        </div>
+
+        <div class="platform-row">
+            <button class="platform-btn active" data-platform="both">Both</button>
+            <button class="platform-btn" data-platform="reddit">Reddit only</button>
+            <button class="platform-btn" data-platform="hackernews">HN only</button>
+        </div>
+
+        <div class="advanced-toggle" id="advancedToggle">⚙ Advanced options</div>
+        <div class="advanced-panel" id="advancedPanel">
+            <div class="adv-row">
+                <span class="adv-label">Subreddit</span>
+                <input type="text" class="adv-input" id="subredditInput" placeholder="e.g. technology (optional)">
+            </div>
+            <div class="adv-row">
+                <span class="adv-label">Comments</span>
+                <div class="limit-options">
+                    <button class="limit-btn active" data-limit="10">10</button>
+                    <button class="limit-btn" data-limit="20">20</button>
+                    <button class="limit-btn" data-limit="50">50</button>
+                </div>
+            </div>
+            <div class="adv-row">
+                <span class="adv-label">Time range</span>
+                <div class="time-options">
+                    <button class="time-btn active" data-time="all">All time</button>
+                    <button class="time-btn" data-time="year">Past year</button>
+                    <button class="time-btn" data-time="month">Past month</button>
+                    <button class="time-btn" data-time="week">Past week</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="analyze-btn" id="analyzeBtn">Analyze →</button>
+    </div>
+
+    <div class="intel-panel" id="intelPanel">
+        <div class="intel-title">
+            🔍 We found multiple angles for this topic
+            <span>Select one to narrow your search, or skip to search broadly</span>
+        </div>
+        <div class="intel-aspects" id="intelAspects"></div>
+        <div class="intel-actions">
+            <button class="intel-proceed" id="intelProceed">Search this angle →</button>
+            <button class="intel-skip" id="intelSkip">Search broadly</button>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <p id="loadingMsg">Fetching & classifying comments...</p>
+    </div>
+
+    <div class="results" id="results">
+        <div class="filter-bar">
+            <span class="filter-label">Filter:</span>
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="reddit">Reddit</button>
+            <button class="filter-btn" data-filter="hackernews">HN</button>
+            <select class="sort-select" id="sortSelect">
+                <option value="score">Sort by score</option>
+                <option value="confidence">Sort by confidence</option>
+            </select>
+        </div>
+        <div id="summaryCard"></div>
+        <div id="divergenceExplanation"></div>
+        <div id="subredditBreakdown"></div>
+        <div class="insights" id="insightsRow"></div>
+        <div id="confDist"></div>
+        <div id="topKeywords"></div>
+        <div id="minorityOpinions"></div>
+        <div id="commentsContainer"></div>
+    </div>
+
+    <div class="results" id="compareResults">
+        <div class="compare-grid" id="compareGrid"></div>
+    </div>
+</main>
+
+<script>
+    let dark = false;
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        dark = !dark;
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        document.getElementById('themeToggle').textContent = dark ? '🌙 Dark' : '☀️ Light';
+    });
+
+    let currentMode = 'single';
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentMode = tab.dataset.mode;
+            document.getElementById('singleMode').style.display = currentMode === 'single' ? 'block' : 'none';
+            document.getElementById('compareMode').style.display = currentMode === 'compare' ? 'block' : 'none';
+            document.getElementById('results').classList.remove('visible');
+            document.getElementById('compareResults').classList.remove('visible');
+        });
+    });
+
+    let selectedPlatform = 'both';
+    document.querySelectorAll('.platform-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedPlatform = btn.dataset.platform;
+        });
+    });
+
+    document.getElementById('advancedToggle').addEventListener('click', () => {
+        document.getElementById('advancedPanel').classList.toggle('open');
+    });
+
+    let selectedLimit = 10;
+    document.querySelectorAll('.limit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.limit-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedLimit = parseInt(btn.dataset.limit);
+        });
+    });
+
+    let selectedTime = 'all';
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedTime = btn.dataset.time;
+        });
+    });
+
+    document.querySelectorAll('.example-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.getElementById('queryInput').value = chip.dataset.topic;
+            runIntelligence(chip.dataset.topic);
+        });
+    });
+
+    document.getElementById('queryInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('analyzeBtn').click();
+    });
+
+    let searchHistory = JSON.parse(localStorage.getItem('cs_history') || '[]');
+    function saveHistory(query) {
+        searchHistory = [query, ...searchHistory.filter(q => q !== query)].slice(0, 6);
+        localStorage.setItem('cs_history', JSON.stringify(searchHistory));
+        renderHistory();
+    }
+    function renderHistory() {
+        const section = document.getElementById('historySection');
+        const chips = document.getElementById('historyChips');
+        if (searchHistory.length === 0) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+        chips.innerHTML = searchHistory.map(q => `
+            <div class="history-chip" onclick="document.getElementById('queryInput').value='${q.replace(/'/g,"\\'")}';runSearch('${q.replace(/'/g,"\\'")}')">
+                ${q}
+            </div>
+        `).join('');
+    }
+    renderHistory();
+
+    let intelData = null;
+    let selectedAspect = null;
+
+    async function runIntelligence(query) {
+        document.getElementById('intelPanel').classList.remove('visible');
+        selectedAspect = null;
+        try {
+            const res = await fetch('/intelligence', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            });
+            intelData = await res.json();
+            if (intelData.aspects && intelData.aspects.length > 1) {
+                document.getElementById('intelAspects').innerHTML = intelData.aspects.map(a =>
+                    `<div class="aspect-chip" data-aspect="${a}" onclick="selectAspect(this,'${a.replace(/'/g,"\\'")}'">${a}</div>`
+                ).join('');
+                document.getElementById('intelPanel').classList.add('visible');
+            } else {
+                runSearch(query);
+            }
+        } catch(e) {
+            runSearch(query);
+        }
+    }
+
+    function selectAspect(el, aspect) {
+        document.querySelectorAll('.aspect-chip').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedAspect = aspect;
+    }
+
+    document.getElementById('intelProceed').addEventListener('click', () => {
+        const query = document.getElementById('queryInput').value.trim();
+        const searchQuery = selectedAspect ? `${intelData.core_topic} ${selectedAspect}` : query;
+        document.getElementById('intelPanel').classList.remove('visible');
+        runSearch(searchQuery);
+    });
+
+    document.getElementById('intelSkip').addEventListener('click', () => {
+        document.getElementById('intelPanel').classList.remove('visible');
+        runSearch(document.getElementById('queryInput').value.trim());
+    });
+
+    document.getElementById('analyzeBtn').addEventListener('click', () => {
+        if (currentMode === 'single') {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) return;
+            runIntelligence(query);
+        } else {
+            const qa = document.getElementById('queryA').value.trim();
+            const qb = document.getElementById('queryB').value.trim();
+            if (!qa || !qb) return;
+            runCompare(qa, qb);
+        }
+    });
+
+    let activeFilter = 'all';
+    let activeSort = 'score';
+    let lastData = null;
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeFilter = btn.dataset.filter;
+            if (lastData) renderComments(lastData, lastData.query);
+        });
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', e => {
+        activeSort = e.target.value;
+        if (lastData) renderComments(lastData, lastData.query);
+    });
+
+    async function runSearch(query) {
+        const subreddit = document.getElementById('subredditInput').value.trim();
+        document.getElementById('analyzeBtn').disabled = true;
+        document.getElementById('loading').classList.add('visible');
+        document.getElementById('results').classList.remove('visible');
+        document.getElementById('loadingMsg').textContent = 'Fetching & classifying comments...';
+
+        try {
+            const res = await fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, platform: selectedPlatform, subreddit, limit: selectedLimit, time_filter: selectedTime })
+            });
+            const data = await res.json();
+            saveHistory(query);
+            lastData = data;
+            renderResults(data, query);
+        } catch(e) {
+            alert('Something went wrong. Check the terminal.');
+        }
+
+        document.getElementById('analyzeBtn').disabled = false;
+        document.getElementById('loading').classList.remove('visible');
+    }
+
+    async function runCompare(qa, qb) {
+        document.getElementById('analyzeBtn').disabled = true;
+        document.getElementById('loading').classList.add('visible');
+        document.getElementById('compareResults').classList.remove('visible');
+        document.getElementById('loadingMsg').textContent = 'Comparing topics...';
+
+        try {
+            const res = await fetch('/compare', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query_a: qa, query_b: qb, platform: selectedPlatform, limit: selectedLimit, time_filter: selectedTime })
+            });
+            const data = await res.json();
+            renderCompare(data);
+        } catch(e) {
+            alert('Something went wrong. Check the terminal.');
+        }
+
+        document.getElementById('analyzeBtn').disabled = false;
+        document.getElementById('loading').classList.remove('visible');
+    }
+
+    function highlightKeywords(text, query) {
+        if (!query) return text;
+        const words = query.split(' ').filter(w => w.length > 3);
+        let result = text;
+        words.forEach(word => {
+            const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            result = result.replace(regex, '<span class="highlight">$1</span>');
+        });
+        return result;
+    }
+
+    function renderResults(data, query) {
+        if (data.error) {
+            document.getElementById('summaryCard').innerHTML = `<div class="error-card">⚠️ ${data.error}</div>`;
+            ['divergenceExplanation','subredditBreakdown','insightsRow','confDist','topKeywords','minorityOpinions','commentsContainer'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+            document.getElementById('results').classList.add('visible');
+            return;
+        }
+
+        const total = data.total;
+        const forC = data.grouped.FOR.length;
+        const againstC = data.grouped.AGAINST.length;
+        const nuancedC = data.grouped.NUANCED.length;
+        const forPct = total ? Math.round(forC/total*100) : 0;
+        const againstPct = total ? Math.round(againstC/total*100) : 0;
+        const nuancedPct = total ? Math.round(nuancedC/total*100) : 0;
+        const cached = data.cached ? '<span class="cached-badge">⚡ cached</span>' : '';
+
+        document.getElementById('summaryCard').innerHTML = `
+            <div class="summary-card">
+                <div class="summary-top">
+                    <div class="summary-title">"${data.query}" ${cached}</div>
+                    <div class="summary-meta">${total} comments · Reddit ${data.reddit_count} · HN ${data.hn_count}</div>
+                </div>
+                <div class="stance-bar">
+                    <div class="bar-seg bar-for" style="flex:${forPct}"></div>
+                    <div class="bar-seg bar-against" style="flex:${againstPct}"></div>
+                    <div class="bar-seg bar-nuanced" style="flex:${nuancedPct}"></div>
+                </div>
+                <div class="stance-labels">
+                    <span class="lbl-for">FOR ${forPct}%</span>
+                    <span class="lbl-against">AGAINST ${againstPct}%</span>
+                    <span class="lbl-nuanced">NUANCED ${nuancedPct}%</span>
+                </div>
+                <div class="divergence-row">
+                    <div class="div-block">
+                        <div class="div-label">Cross-platform divergence</div>
+                        <div class="div-score">${data.divergence}%</div>
+                    </div>
+                    <div class="platform-pills">
+                        <div class="platform-pill">
+                            <strong>Reddit</strong>
+                            <div class="pill-stats">
+                                <span class="pill-for">FOR ${data.reddit_ratio.FOR}%</span>
+                                <span class="pill-against">AGN ${data.reddit_ratio.AGAINST}%</span>
+                                <span class="pill-nuanced">NUA ${data.reddit_ratio.NUANCED}%</span>
+                            </div>
+                        </div>
+                        <div class="platform-pill">
+                            <strong>Hacker News</strong>
+                            <div class="pill-stats">
+                                <span class="pill-for">FOR ${data.hn_ratio.FOR}%</span>
+                                <span class="pill-against">AGN ${data.hn_ratio.AGAINST}%</span>
+                                <span class="pill-nuanced">NUA ${data.hn_ratio.NUANCED}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+        document.getElementById('divergenceExplanation').innerHTML = data.divergence_explanation
+            ? `<div class="divergence-explanation"><strong>Why communities differ</strong>${data.divergence_explanation}</div>`
+            : '';
+
+        const breakdown = data.subreddit_breakdown || {};
+        const subs = Object.entries(breakdown).sort((a,b) => b[1].total - a[1].total).slice(0, 5);
+        if (subs.length > 1) {
+            let subHtml = '<div class="subreddit-breakdown"><div class="sub-breakdown-title">Reddit breakdown by subreddit</div>';
+            subs.forEach(([sub, stats]) => {
+                const fp = stats.total ? Math.round(stats.FOR/stats.total*100) : 0;
+                const ap = stats.total ? Math.round(stats.AGAINST/stats.total*100) : 0;
+                const np = stats.total ? Math.round(stats.NUANCED/stats.total*100) : 0;
+                subHtml += `<div class="sub-row">
+                    <span class="sub-name">r/${sub}</span>
+                    <div class="sub-bar">
+                        <div class="bar-for" style="flex:${fp}"></div>
+                        <div class="bar-against" style="flex:${ap}"></div>
+                        <div class="bar-nuanced" style="flex:${np}"></div>
+                    </div>
+                    <span class="sub-count">${stats.total}</span>
+                </div>`;
+            });
+            subHtml += '</div>';
+            document.getElementById('subredditBreakdown').innerHTML = subHtml;
+        } else {
+            document.getElementById('subredditBreakdown').innerHTML = '';
+        }
+
+        document.getElementById('insightsRow').innerHTML = ['FOR','AGAINST','NUANCED'].map(stance => {
+            const summary = data.summaries[stance];
+            const count = data.grouped[stance].length;
+            return `<div class="insight-card">
+                <div class="ic-header">
+                    <span class="stance-tag tag-${stance.toLowerCase()}">${stance}</span>
+                    <span class="ic-count">${count} comments</span>
+                </div>
+                ${summary ? `<div class="ic-summary">${summary}</div>` : `<div class="ic-empty">No comments in this category.</div>`}
+            </div>`;
+        }).join('');
+
+        const conf = data.confidence_distribution || {};
+        const confTotal = (conf.high||0) + (conf.medium||0) + (conf.low||0);
+        document.getElementById('confDist').innerHTML = confTotal > 0 ? `
+            <div class="conf-dist-card">
+                <div class="conf-dist-title">Classification confidence</div>
+                <div class="conf-bar">
+                    <div class="conf-seg conf-high" style="flex:${conf.high||0}"></div>
+                    <div class="conf-seg conf-med" style="flex:${conf.medium||0}"></div>
+                    <div class="conf-seg conf-low" style="flex:${conf.low||0}"></div>
+                </div>
+                <div class="conf-labels">
+                    <span class="conf-high-lbl">High ${conf.high||0}</span>
+                    <span class="conf-med-lbl">Medium ${conf.medium||0}</span>
+                    <span class="conf-low-lbl">Low ${conf.low||0}</span>
+                </div>
+                ${(conf.low||0) > confTotal * 0.4 ? '<div class="conf-note">⚠️ Many comments were ambiguous — this topic may be genuinely complex or context-dependent.</div>' : ''}
+            </div>` : '';
+
+        const keywords = data.top_keywords || [];
+        document.getElementById('topKeywords').innerHTML = keywords.length > 0 ? `
+            <div class="keywords-card">
+                <div class="keywords-title">Top keywords in discussion</div>
+                <div class="keywords-chips">
+                    ${keywords.map(k => `<span class="keyword-chip" onclick="document.getElementById('queryInput').value='${k}';runIntelligence('${k}')">${k}</span>`).join('')}
+                </div>
+            </div>` : '';
+
+        if (data.minority_stance && data.minority_comments && data.minority_comments.length > 0) {
+            const cls = data.minority_stance.toLowerCase();
+            let minHtml = `<div class="minority-card">
+                <div class="minority-title">🔍 Contrarian view <span class="stance-tag tag-${cls}">${data.minority_stance}</span></div>
+                <div class="minority-note">These minority opinions go against the majority — often the most interesting takes.</div>`;
+            data.minority_comments.forEach(c => {
+                const text = c.text.length > 200 ? c.text.slice(0,200) + '…' : c.text;
+                const viewLink = c.url ? `<a class="view-link" href="${c.url}" target="_blank">view ↗</a>` : '';
+                minHtml += `<div class="minority-comment">
+                    <div class="comment-meta">
+                        <span class="source-badge">${c.source}</span>
+                        ${c.subreddit ? `<span class="sub-badge">r/${c.subreddit}</span>` : ''}
+                        <span class="score-badge">↑ ${c.score}</span>
+                        <div class="comment-actions">${viewLink}</div>
+                    </div>
+                    <div class="comment-text">${text}</div>
+                </div>`;
+            });
+            minHtml += '</div>';
+            document.getElementById('minorityOpinions').innerHTML = minHtml;
+        } else {
+            document.getElementById('minorityOpinions').innerHTML = '';
+        }
+
+        renderComments(data, query);
+        document.getElementById('results').classList.add('visible');
+    }
+
+    function renderComments(data, query) {
+        query = query || data.query || '';
+        const container = document.getElementById('commentsContainer');
+        container.innerHTML = '';
+
+        ['FOR','AGAINST','NUANCED'].forEach(stance => {
+            let comments = [...(data.grouped[stance] || [])];
+            if (activeFilter !== 'all') comments = comments.filter(c => c.source === activeFilter);
+            if (activeSort === 'score') comments.sort((a,b) => b.score - a.score);
+            else comments.sort((a,b) => (b.confidence||1) - (a.confidence||1));
+            if (comments.length === 0) return;
+
+            const cls = stance.toLowerCase();
+            const top = comments.slice(0, 5);
+            const stars = n => '●'.repeat(n) + '○'.repeat(3-n);
+
+            let html = `<div class="stance-group">
+                <div class="group-header">
+                    <span class="stance-tag tag-${cls}">${stance}</span>
+                    <span class="group-count">${comments.length} comment${comments.length!==1?'s':''}</span>
+                </div>`;
+
+            top.forEach(c => {
+                const full = c.text;
+                const preview = full.length > 280 ? full.slice(0,280) + '…' : full;
+                const expandable = full.length > 280;
+                const sub = c.subreddit ? `<span class="sub-badge">r/${c.subreddit}</span>` : '';
+                const conf = c.confidence ? `<span class="conf-badge">${stars(c.confidence)}</span>` : '';
+                const viewLink = c.url ? `<a class="view-link" href="${c.url}" target="_blank">view ↗</a>` : '';
+                const reason = c.reason ? `<div class="reason-text">💭 ${c.reason}</div>` : '';
+                const highlightedPreview = highlightKeywords(preview, query);
+
+                html += `<div class="comment-card ${cls}">
+                    <div class="comment-meta">
+                        <span class="source-badge">${c.source}</span>
+                        ${sub}
+                        <span class="score-badge">↑ ${c.score}</span>
+                        ${conf}
+                        <div class="comment-actions">${viewLink}</div>
+                    </div>
+                    <div class="comment-text collapsed"
+                         data-full="${encodeURIComponent(full)}"
+                         data-preview="${encodeURIComponent(preview)}"
+                         data-query="${encodeURIComponent(query)}"
+                         onclick="toggleExpand(this)">
+                        ${highlightedPreview}
+                    </div>
+                    ${expandable ? '<div class="expand-hint" onclick="toggleExpand(this.previousElementSibling)">Click to expand</div>' : ''}
+                    ${reason}
+                </div>`;
+            });
+
+            html += '</div>';
+            container.innerHTML += html;
+        });
+    }
+
+    function toggleExpand(el) {
+        const isCollapsed = el.classList.contains('collapsed');
+        const query = decodeURIComponent(el.dataset.query || '');
+        if (isCollapsed) {
+            el.classList.remove('collapsed');
+            el.innerHTML = highlightKeywords(decodeURIComponent(el.dataset.full), query);
+            const hint = el.nextElementSibling;
+            if (hint && hint.classList.contains('expand-hint')) hint.textContent = 'Click to collapse';
+        } else {
+            el.classList.add('collapsed');
+            el.innerHTML = highlightKeywords(decodeURIComponent(el.dataset.preview), query);
+            const hint = el.nextElementSibling;
+            if (hint && hint.classList.contains('expand-hint')) hint.textContent = 'Click to expand';
+        }
+    }
+
+    function renderCompare(data) {
+        const grid = document.getElementById('compareGrid');
+        grid.innerHTML = '';
+        ['a','b'].forEach(key => {
+            const d = data[key];
+            const total = d.total;
+            const forPct = total ? Math.round(d.grouped.FOR.length/total*100) : 0;
+            const againstPct = total ? Math.round(d.grouped.AGAINST.length/total*100) : 0;
+            const nuancedPct = total ? Math.round(d.grouped.NUANCED.length/total*100) : 0;
+            grid.innerHTML += `<div class="compare-col">
+                <div class="compare-col-title">"${d.query}" — ${total} comments</div>
+                <div class="summary-card">
+                    <div class="stance-bar" style="margin-bottom:10px">
+                        <div class="bar-seg bar-for" style="flex:${forPct}"></div>
+                        <div class="bar-seg bar-against" style="flex:${againstPct}"></div>
+                        <div class="bar-seg bar-nuanced" style="flex:${nuancedPct}"></div>
+                    </div>
+                    <div class="stance-labels">
+                        <span class="lbl-for">FOR ${forPct}%</span>
+                        <span class="lbl-against">AGN ${againstPct}%</span>
+                        <span class="lbl-nuanced">NUA ${nuancedPct}%</span>
+                    </div>
+                    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+                        ${['FOR','AGAINST','NUANCED'].map(stance => {
+                            const summary = d.summaries[stance];
+                            return summary ? `<div style="margin-bottom:10px">
+                                <span class="stance-tag tag-${stance.toLowerCase()}">${stance}</span>
+                                <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.6">${summary}</p>
+                            </div>` : '';
+                        }).join('')}
+                    </div>
+                    ${d.divergence_explanation ? `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--text-secondary);line-height:1.7">${d.divergence_explanation}</div>` : ''}
+                </div>
+            </div>`;
+        });
+        document.getElementById('compareResults').classList.add('visible');
+    }
+</script>
+</body>
+</html>
